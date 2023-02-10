@@ -1,3 +1,1 @@
-from sltk import preprocess
-
-preprocess.sayHello()
+from sltk import sltk
