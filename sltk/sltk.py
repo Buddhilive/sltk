@@ -1,20 +1,20 @@
 import re
 import json
 import os
+from tqdm import tqdm
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # split tokens using white spaces
 def whiteSpace(text: str):
     tokens = text.split(' ')
-
-    uniqueTokens = list()
+    # tokens = re.split(r"[\u0000-\u007F]", text)
+    finalTokens = list()
     for token in tokens:
         if(token != '' and token != ' '):
-            if(uniqueTokens.count(token) == 0):
-                uniqueTokens.append(token)
+            finalTokens.append(token)
 
-    return tokens
+    return finalTokens
 
 # find emails in a string
 def __findEmails(text: str):
@@ -37,10 +37,11 @@ def __maskAbbreviations(text: str):
     abbr = abbr.read()
     abbr = json.loads(abbr)
 
-    for i in abbr:
+    for i in tqdm(abbr, ascii=True, desc='Masking Abbreviations'):
         replacer = str(i).replace('.', '<dot/> ')
         i = str(i).replace('.', '')
-        text = re.sub(r'(^|\.|\s|)+(' + i + r'\.)', f' {replacer}', text)
+        text = re.sub(r'' + i + r'\.', f'{i}. ', text)
+        text = re.sub(r'(^|\.|\s)+(' + i + r'\.)', f' {replacer}', text)
     return text
 
 # find and mask tokens from dictionary
@@ -48,7 +49,7 @@ def __fromDictionary(text: str):
     dictionary = open(f"{ROOT_DIR}/shared/dict.json", "r")
     dictionary = dictionary.read()
     dictionary = json.loads(dictionary)
-    for i in dictionary:
+    for i in tqdm(dictionary, ascii=True, desc='Dictionary Lookup'):
         replacer = str(i).replace(' ', '<cmb/>')
         text = text.replace(i, replacer)
     
@@ -60,18 +61,18 @@ def __maskSpecial(text: str):
     urls = __findURLs(text)
     decimals = __findDecimal(text)
 
-    for i in emails:
+    for i in tqdm(emails, ascii=True, desc='Masking Emails'):
         replacer = str(i).replace('.', '<dot/>')
         text = text.replace(i, replacer)
     
-    for i in urls:
+    for i in tqdm(urls, ascii=True, desc='Masking URLs'):
         i = ''.join(i)
         replacer = str(i).replace('.', '<dot/>')
         replacer = replacer.replace('!', '<exc/>')
         replacer = replacer.replace('?', '<que/>')
         text = text.replace(i, replacer)
 
-    for i in decimals:
+    for i in tqdm(decimals, ascii=True, desc='Masking decimals'):
         replacer = str(i).replace('.', '<dot/>')
         text = text.replace(i, replacer)
 
@@ -88,7 +89,7 @@ def splitSentences(text: str):
     return sentences
 
 # normalize masked text
-def __normalize(text: str):
+def normalize(text: str):
     text = text.replace('<dot/>', '.')
     text = text.replace('<exc/>', '!')
     text = text.replace('<que/>', '?')
@@ -97,7 +98,7 @@ def __normalize(text: str):
     return text
 
 # sunword tokenize
-def __subwordTokenizer(tokens: list):
+def subwordTokenizer(tokens: list):
     newTokens = tokens
     tokenList = list()
 
@@ -115,19 +116,48 @@ def __subwordTokenizer(tokens: list):
                 charToken = ''.join(token[:charIndex])
 
                 for word in tokens:
-                    if(charToken in word):
+                    if(word.startswith(charToken)):
                         charCount = charCount + 1
             
-        if(charCount > 0):
+        if(charCount > 1):
             tokenList.append(charToken)
 
     return tokenList
 
+# check punctuations
+def __isPunctuation(char: str):
+    punctuations = '[~`!@#$%^&*(){}[];:"\'<,.>?/\\|-_+=“”‘’–•'
+    return char in punctuations
+
+# check whitespace
+def __isWhitespace(char: str):
+    return char == '' or char == ' '
+
+# clean tokens
+def __cleanTokens(tokens: list()):
+    finalTokens = list()
+    for token in tqdm(tokens, ascii=True, desc='Cleaning Tokens'):
+        selectedToken = list()
+        for char in token:
+            if(not __isWhitespace(char) and not __isPunctuation(char)):
+                selectedToken.append(char)
+        finalTokens.append(''.join(selectedToken))
+
+    return finalTokens
+
+# get default tokens
+def __getDefaultTokens():
+    dTokens = ["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]", "[NEW]", "[END]"]
+    with open(f'{ROOT_DIR}/shared/pre.txt', 'r') as f:
+        dTokens.extend(f.read().split('\n'))
+
+    return dTokens
+
 # tokenize
 def tokenize(sentences: list):
     text = ' '.join(sentences)
-    text = __normalize(text)
-    tokens = re.split(r"[\u0000-\u007F]", text)
+    text = normalize(text)
+    tokens = re.split(r"[\u0000-\u007F]", text.lower())
     tokens = sorted(tokens)
 
     """ uniqueTokens = dict()
@@ -138,13 +168,17 @@ def tokenize(sentences: list):
             else:
                 uniqueTokens[token] = 1 """
 
-    uniqueTokens = list()
-    for token in tokens:
+    tokens = __cleanTokens(tokens)
+
+    defaultTokens = __getDefaultTokens()
+    defaultLen = len(defaultTokens)
+    uniqueTokens = defaultTokens
+    for token in tqdm(tokens, ascii=True, desc='Tokenizing'):
         if(token != '' and token != ' '):
             if(uniqueTokens.count(token) == 0):
                 uniqueTokens.append(token)
 
-    print(f'Found {len(uniqueTokens)} unique tokens out of {len(tokens)} tokens')
+    print(f'Found {len(uniqueTokens) - defaultLen} unique tokens out of {len(tokens)} tokens.\nTotal {len(uniqueTokens)} Tokens')
 
     return uniqueTokens
 
