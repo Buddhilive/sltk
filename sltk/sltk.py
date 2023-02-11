@@ -7,8 +7,8 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # split tokens using white spaces
 def whiteSpace(text: str):
-    tokens = text.split(' ')
-    # tokens = re.split(r"[\u0000-\u007F]", text)
+    # tokens = text.split(' ')
+    tokens = re.split(r"([\s~`!@#$%^&\*\(\){}\[\];:\"'<,\.>\?\/\\\-_+=“”‘’–•])", text)
     finalTokens = list()
     for token in tokens:
         if(token != '' and token != ' '):
@@ -97,33 +97,6 @@ def normalize(text: str):
     text = re.sub(r'(\n|\r)', '', text)
     return text
 
-# sunword tokenize
-def subwordTokenizer(tokens: list):
-    newTokens = tokens
-    tokenList = list()
-
-    for token in tokens:
-        charIndex = 1
-        charToken = token
-        charCount = 0
-
-        for subword in tokenList:
-            token = token.replace(subword, '')
-
-        for newToken in token:
-            if(len(token) > charIndex):
-                charIndex = charIndex + 1
-                charToken = ''.join(token[:charIndex])
-
-                for word in tokens:
-                    if(word.startswith(charToken)):
-                        charCount = charCount + 1
-            
-        if(charCount > 1):
-            tokenList.append(charToken)
-
-    return tokenList
-
 # check punctuations
 def __isPunctuation(char: str):
     punctuations = '[~`!@#$%^&*(){}[];:"\'<,.>?/\\|-_+=“”‘’–•'
@@ -153,27 +126,19 @@ def __getDefaultTokens():
 
     return dTokens
 
-# tokenize
-def tokenize(sentences: list):
+# build vocab
+def buildVocab(sentences: list):
     text = ' '.join(sentences)
     text = normalize(text)
     tokens = re.split(r"[\u0000-\u007F]", text.lower())
     tokens = sorted(tokens)
-
-    """ uniqueTokens = dict()
-    for token in tokens:
-        if(token != '' and token != ' '):
-            if(token in uniqueTokens.keys()):
-                uniqueTokens[token] = uniqueTokens[token] + 1
-            else:
-                uniqueTokens[token] = 1 """
 
     tokens = __cleanTokens(tokens)
 
     defaultTokens = __getDefaultTokens()
     defaultLen = len(defaultTokens)
     uniqueTokens = defaultTokens
-    for token in tqdm(tokens, ascii=True, desc='Tokenizing'):
+    for token in tqdm(tokens, ascii=True, desc='Generating Vocab'):
         if(token != '' and token != ' '):
             if(uniqueTokens.count(token) == 0):
                 uniqueTokens.append(token)
@@ -181,6 +146,78 @@ def tokenize(sentences: list):
     print(f'Found {len(uniqueTokens) - defaultLen} unique tokens out of {len(tokens)} tokens.\nTotal {len(uniqueTokens)} Tokens')
 
     return uniqueTokens
+
+# tokenize
+def tokenize(vocab: str, sentences: list):
+    tokens = list()
+    with open(f'{vocab}', 'r') as f:
+        tokens.extend(f.read().split('\n'))
+    vectors = list()
+
+    for sentence in tqdm(sentences, ascii=True, desc='Tokenizing'):
+        vectors2 = list()
+        sentence = normalize(sentence)
+        sentence = whiteSpace(sentence)
+        vectors2.append(tokens.index('[CLS]'))
+
+        for word in sentence:
+            if(tokens.count(word) > 0):
+                vectors2.append(tokens.index(word))
+            else:
+                newWord = list()
+                newWord.append(tokens.index('[NEW]'))
+                for char in word:
+                    if(tokens.count(char) != 0):
+                        newWord.append(tokens.index(char))
+                    else:
+                        newWord.append(tokens.index('[UNK]'))
+
+                newWord.append(tokens.index('[END]'))
+                vectors2.extend(newWord)
+
+        vectors2.append(tokens.index('[SEP]'))    
+        vectors.append(vectors2)
+
+    return vectors
+
+# decode vectors
+def decode(vocab: str, vectors: list):
+    tokens = list()
+    with open(f'{vocab}', 'r') as f:
+        tokens.extend(f.read().split('\n'))
+
+    sentence = list()
+    newWord = list()
+    isNewWord = False
+    isFirst = True
+    space = ''
+    for vector in vectors:
+        if(tokens[vector] == '[NEW]'):
+            isNewWord = True
+        
+        if(tokens[vector] != '[CLS]' and tokens[vector] != '[SEP]'):
+            if(isFirst):
+                isFirst = False
+            elif(not __isPunctuation(tokens[vector])):
+                space = ' '
+            else:
+                space = ''
+
+            if(isNewWord):
+                if(tokens[vector] == '[END]'):
+                    isNewWord = False
+                    sentence.append(f"{space}{''.join(newWord)}")
+                    newWord = list()
+                else:
+                    if(tokens[vector] != '[NEW]'):
+                        newWord.append(tokens[vector])
+
+            else:
+                sentence.append(f"{space}{tokens[vector]}")
+        elif(tokens[vector] == '[SEP]'):
+            sentence.append('.')
+        
+    return ''.join(sentence)
 
 def test(text):
     test = __findURLs(text)
