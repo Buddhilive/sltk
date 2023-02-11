@@ -7,6 +7,13 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 # split tokens using white spaces
 def whiteSpace(text: str):
     tokens = text.split(' ')
+
+    uniqueTokens = list()
+    for token in tokens:
+        if(token != '' and token != ' '):
+            if(uniqueTokens.count(token) == 0):
+                uniqueTokens.append(token)
+
     return tokens
 
 # find emails in a string
@@ -32,7 +39,8 @@ def __maskAbbreviations(text: str):
 
     for i in abbr:
         replacer = str(i).replace('.', '<dot/> ')
-        text = re.sub(r'(^|\.|\s)+(' + i + r')', replacer, text)
+        i = str(i).replace('.', '')
+        text = re.sub(r'(^|\.|\s|)+(' + i + r'\.)', f' {replacer}', text)
     return text
 
 # find and mask tokens from dictionary
@@ -71,7 +79,9 @@ def __maskSpecial(text: str):
 
 # preprocess and split sentences
 def splitSentences(text: str):
-    preprocessText = __maskAbbreviations(text)
+    preprocessText = re.sub(r'\.(?=\S\W)', '. ', text)
+    # print(preprocessText)
+    preprocessText = __maskAbbreviations(preprocessText)
     preprocessText = __fromDictionary(preprocessText)
     preprocessText = __maskSpecial(preprocessText)
     sentences = re.split(r"[.!?]", preprocessText)
@@ -83,18 +93,56 @@ def __normalize(text: str):
     text = text.replace('<exc/>', '!')
     text = text.replace('<que/>', '?')
     text = text.replace('<cmb/>', '')
+    text = re.sub(r'(\n|\r)', '', text)
     return text
+
+# sunword tokenize
+def __subwordTokenizer(tokens: list):
+    newTokens = tokens
+    tokenList = list()
+
+    for token in tokens:
+        charIndex = 1
+        charToken = token
+        charCount = 0
+
+        for subword in tokenList:
+            token = token.replace(subword, '')
+
+        for newToken in token:
+            if(len(token) > charIndex):
+                charIndex = charIndex + 1
+                charToken = ''.join(token[:charIndex])
+
+                for word in tokens:
+                    if(charToken in word):
+                        charCount = charCount + 1
+            
+        if(charCount > 0):
+            tokenList.append(charToken)
+
+    return tokenList
 
 # tokenize
 def tokenize(sentences: list):
     text = ' '.join(sentences)
     text = __normalize(text)
-    tokens = whiteSpace(text)
+    tokens = re.split(r"[\u0000-\u007F]", text)
+    tokens = sorted(tokens)
+
+    """ uniqueTokens = dict()
+    for token in tokens:
+        if(token != '' and token != ' '):
+            if(token in uniqueTokens.keys()):
+                uniqueTokens[token] = uniqueTokens[token] + 1
+            else:
+                uniqueTokens[token] = 1 """
 
     uniqueTokens = list()
     for token in tokens:
-        if(uniqueTokens.count(token) == 0):
-            uniqueTokens.append(token)
+        if(token != '' and token != ' '):
+            if(uniqueTokens.count(token) == 0):
+                uniqueTokens.append(token)
 
     print(f'Found {len(uniqueTokens)} unique tokens out of {len(tokens)} tokens')
 
