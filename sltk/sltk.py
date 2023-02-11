@@ -16,7 +16,7 @@ def __findEmails(text: str):
 
 # find URLs in a string
 def __findURLs(text: str):
-    urls = re.findall(r'(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])', text)
+    urls = re.findall(r'((?:http|ftp|https):\/\/)?([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])', text)
     return urls
 
 # find decimals in a string
@@ -32,7 +32,7 @@ def __maskAbbreviations(text: str):
 
     for i in abbr:
         replacer = str(i).replace('.', '<dot/> ')
-        text = text.replace(i, replacer)
+        text = re.sub(r'(^|\.|\s)+(' + i + r')', replacer, text)
     return text
 
 # find and mask tokens from dictionary
@@ -57,7 +57,10 @@ def __maskSpecial(text: str):
         text = text.replace(i, replacer)
     
     for i in urls:
+        i = ''.join(i)
         replacer = str(i).replace('.', '<dot/>')
+        replacer = replacer.replace('!', '<exc/>')
+        replacer = replacer.replace('?', '<que/>')
         text = text.replace(i, replacer)
 
     for i in decimals:
@@ -66,11 +69,37 @@ def __maskSpecial(text: str):
 
     return text
 
-
 # preprocess and split sentences
 def splitSentences(text: str):
     preprocessText = __maskAbbreviations(text)
     preprocessText = __fromDictionary(preprocessText)
     preprocessText = __maskSpecial(preprocessText)
-    sentences = re.split(r"\(?[^\.\?\!]+[\.!\?]\)?", preprocessText)
+    sentences = re.split(r"[.!?]", preprocessText)
     return sentences
+
+# normalize masked text
+def __normalize(text: str):
+    text = text.replace('<dot/>', '.')
+    text = text.replace('<exc/>', '!')
+    text = text.replace('<que/>', '?')
+    text = text.replace('<cmb/>', '')
+    return text
+
+# tokenize
+def tokenize(sentences: list):
+    text = ' '.join(sentences)
+    text = __normalize(text)
+    tokens = whiteSpace(text)
+
+    uniqueTokens = list()
+    for token in tokens:
+        if(uniqueTokens.count(token) == 0):
+            uniqueTokens.append(token)
+
+    print(f'Found {len(uniqueTokens)} unique tokens out of {len(tokens)} tokens')
+
+    return uniqueTokens
+
+def test(text):
+    test = __findURLs(text)
+    return test
