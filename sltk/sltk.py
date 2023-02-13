@@ -135,6 +135,15 @@ def buildVocab(sentences: list):
 
     tokens = __cleanTokens(tokens)
 
+    tempTokens = dict()
+    for token in tqdm(tokens, ascii=True, desc='Calculating Frequency'):
+        if token in tempTokens.keys():
+            tempTokens[token] =  tempTokens[token] + 1
+        else:
+            tempTokens[token] = 1
+
+    tokens = {k: v for k, v in tempTokens.items() if len(v) > 2}
+
     defaultTokens = __getDefaultTokens()
     defaultLen = len(defaultTokens)
     uniqueTokens = defaultTokens
