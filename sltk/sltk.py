@@ -142,7 +142,7 @@ def buildVocab(sentences: list):
         else:
             tempTokens[token] = 1
 
-    tokens = {k: v for k, v in tempTokens.items() if len(v) > 2}
+    tokens = {k: v for k, v in tempTokens.items() if v > 2}
 
     defaultTokens = __getDefaultTokens()
     defaultLen = len(defaultTokens)
