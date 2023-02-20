@@ -156,84 +156,87 @@ def buildVocab(sentences: list):
 
     return uniqueTokens
 
-# tokenize
-def tokenize(vocab: str, sentences: list):
-    tokens = list()
-    with open(f'{vocab}', 'r') as f:
-        tokens.extend(f.read().split('\n'))
-    vectors = list()
-
-    for sentence in tqdm(sentences, ascii=True, desc='Tokenizing'):
-        vectors2 = list()
-        sentence = normalize(sentence)
-        sentence = whiteSpace(sentence)
-        vectors2.append(tokens.index('[CLS]'))
-
-        for word in sentence:
-            if(tokens.count(word) > 0):
-                vectors2.append(tokens.index(word))
-            else:
-                newWord = list()
-                newWord.append(tokens.index('[NEW]'))
-                for char in word:
-                    if(tokens.count(char) != 0):
-                        newWord.append(tokens.index(char))
-                    else:
-                        newWord.append(tokens.index('[UNK]'))
-
-                newWord.append(tokens.index('[END]'))
-                vectors2.extend(newWord)
-
-        vectors2.append(tokens.index('[SEP]'))    
-        vectors.append(vectors2)
-
-    return vectors
-
-# decode vectors
-def decode(vocab: str, vectors: list):
-    tokens = list()
-    with open(f'{vocab}', 'r') as f:
-        tokens.extend(f.read().split('\n'))
-
-    sentence = list()
-    newWord = list()
-    isNewWord = False
-    isFirst = True
-    space = ''
-    for vector in vectors:
-        if(tokens[vector] == '[NEW]'):
-            isNewWord = True
-        
-        if(tokens[vector] != '[CLS]' and tokens[vector] != '[SEP]'):
-            if(isFirst):
-                isFirst = False
-            elif(not __isPunctuation(tokens[vector])):
-                space = ' '
-            else:
-                space = ''
-
-            if(isNewWord):
-                if(tokens[vector] == '[END]'):
-                    isNewWord = False
-                    sentence.append(f"{space}{''.join(newWord)}")
-                    newWord = list()
-                else:
-                    if(tokens[vector] != '[NEW]'):
-                        newWord.append(tokens[vector])
-
-            else:
-                sentence.append(f"{space}{tokens[vector]}")
-        elif(tokens[vector] == '[SEP]'):
-            sentence.append('.')
-        
-    return ''.join(sentence)
-
-def test(text):
-    test = __findURLs(text)
-    return test
+# save vocab
+def save(tokens: list, path: str):
+    f = open(path, "w")
+    f.write('\n'.join(tokens))
+    f.close()
 
 class Tokenizer:
     def __init__(self, vocab: str):
         self.tokens = list()
         with open(f'{vocab}', 'r') as f:
             self.tokens.extend(f.read().split('\n'))
+
+    # check punctuations
+    def __isPunctuation(self, char: str):
+        punctuations = '[~`!@#$%^&*(){}[];:"\'<,.>?/\\|-_+=“”‘’–•'
+        return char in punctuations
+
+    # tokenize
+    def tokenize(self, sentences: list):
+        tokens = self.tokens
+        vectors = list()
+
+        for sentence in tqdm(sentences, ascii=True, desc='Tokenizing'):
+            vectors2 = list()
+            sentence = normalize(sentence)
+            sentence = whiteSpace(sentence)
+            vectors2.append(tokens.index('[CLS]'))
+
+            for word in sentence:
+                if(tokens.count(word) > 0):
+                    vectors2.append(tokens.index(word))
+                else:
+                    newWord = list()
+                    newWord.append(tokens.index('[NEW]'))
+                    for char in word:
+                        if(tokens.count(char) != 0):
+                            newWord.append(tokens.index(char))
+                        else:
+                            newWord.append(tokens.index('[UNK]'))
+
+                    newWord.append(tokens.index('[END]'))
+                    vectors2.extend(newWord)
+
+            vectors2.append(tokens.index('[SEP]'))    
+            vectors.append(vectors2)
+
+        return vectors
+    
+    # decode vectors
+    def decode(self, vectors: list):
+        tokens = self.tokens
+
+        sentence = list()
+        newWord = list()
+        isNewWord = False
+        isFirst = True
+        space = ''
+        for vector in vectors:
+            if(tokens[vector] == '[NEW]'):
+                isNewWord = True
+            
+            if(tokens[vector] != '[CLS]' and tokens[vector] != '[SEP]'):
+                if(isFirst):
+                    isFirst = False
+                elif(not self.__isPunctuation(tokens[vector])):
+                    space = ' '
+                else:
+                    space = ''
+
+                if(isNewWord):
+                    if(tokens[vector] == '[END]'):
+                        isNewWord = False
+                        sentence.append(f"{space}{''.join(newWord)}")
+                        newWord = list()
+                    else:
+                        if(tokens[vector] != '[NEW]'):
+                            newWord.append(tokens[vector])
+
+                else:
+                    sentence.append(f"{space}{tokens[vector]}")
+            elif(tokens[vector] == '[SEP]'):
+                sentence.append('.')
+            
+        return ''.join(sentence)
