@@ -231,3 +231,9 @@ def decode(vocab: str, vectors: list):
 def test(text):
     test = __findURLs(text)
     return test
+
+class Tokenizer:
+    def __init__(self, vocab: str):
+        self.tokens = list()
+        with open(f'{vocab}', 'r') as f:
+            self.tokens.extend(f.read().split('\n'))
