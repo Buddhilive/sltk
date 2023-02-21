@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.1' 
+VERSION = '0.0.6' 
 DESCRIPTION = 'Sinhala Language Tool Kit'
-LONG_DESCRIPTION = 'Sinhala Language Tool Kit'
+LONG_DESCRIPTION = open("README.md", 'r').read()
 
 # Setting up
 
@@ -17,13 +17,19 @@ setup(
         author_email="info@buddhilive.com",
         description=DESCRIPTION,
         long_description=LONG_DESCRIPTION,
+        long_description_content_type='text/markdown',
         packages=find_packages(),
         install_requires=[], # add any additional packages
-        
+        package_data={"sltkpy": ["*.txt", "*.json"]},
+        include_package_data=True,
+        data_files=[('shared', ['sltkpy/shared/pre.txt', 'sltkpy/shared/abbr.json', 'sltkpy/shared/dict.json'])],
         keywords=['python', 'first package'],
         classifiers= [
             "Development Status :: 3 - Alpha",
             "Intended Audience :: Education",
+            "Intended Audience :: Developers",
+            "Intended Audience :: Science/Research",
+            "License :: OSI Approved :: MIT License",
             "Programming Language :: Python :: 2",
             "Programming Language :: Python :: 3",
             "Operating System :: MacOS :: MacOS X",
