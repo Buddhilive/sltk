@@ -158,14 +158,14 @@ def buildVocab(sentences: list):
 
 # save vocab
 def save(tokens: list, path: str):
-    f = open(path, "w")
+    f = open(path, "w", encoding="utf-8")
     f.write('\n'.join(tokens))
     f.close()
 
 class Tokenizer:
     def __init__(self, vocab: str):
         self.tokens = list()
-        with open(f'{vocab}', 'r') as f:
+        with open(f'{vocab}', 'r', encoding="utf-8") as f:
             self.tokens.extend(f.read().split('\n'))
 
     # check punctuations
