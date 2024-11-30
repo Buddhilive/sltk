@@ -10,3 +10,10 @@ sentences = sltk.splitSentences(corpus)
 tokens = sltk.buildVocab(sentences)
 
 st.write(tokens)
+
+sltk.save(tokens, 'models/vocab.txt')
+tokenizer = sltk.Tokenizer('models/vocab.txt')
+
+vectors = tokenizer.tokenize(sentences)
+st.write(len(max(vectors, key=len)))
+st.write(tokenizer.decode(vectors[2]))
