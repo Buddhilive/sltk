@@ -33,7 +33,7 @@ def __findDecimal(text: str):
 
 # find and mask abbreviations in a string
 def __maskAbbreviations(text: str):
-    abbr = open(f"{ROOT_DIR}/shared/abbr.json", "r")
+    abbr = open(f"{ROOT_DIR}/shared/abbr.json", "r", encoding="utf-8")
     abbr = abbr.read()
     abbr = json.loads(abbr)
 
@@ -46,7 +46,7 @@ def __maskAbbreviations(text: str):
 
 # find and mask tokens from dictionary
 def __fromDictionary(text: str):
-    dictionary = open(f"{ROOT_DIR}/shared/dict.json", "r")
+    dictionary = open(f"{ROOT_DIR}/shared/dict.json", "r", encoding="utf-8")
     dictionary = dictionary.read()
     dictionary = json.loads(dictionary)
     for i in tqdm(dictionary, ascii=True, desc='Dictionary Lookup'):
@@ -121,7 +121,7 @@ def __cleanTokens(tokens: list()):
 # get default tokens
 def __getDefaultTokens():
     dTokens = ["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]", "[NEW]", "[END]"]
-    with open(f'{ROOT_DIR}/shared/pre.txt', 'r') as f:
+    with open(f'{ROOT_DIR}/shared/pre.txt', 'r', encoding="utf-8") as f:
         dTokens.extend(f.read().split('\n'))
 
     return dTokens
