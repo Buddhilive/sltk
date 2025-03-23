@@ -22,7 +22,7 @@ setup(
         install_requires=[], # add any additional packages
         package_data={"sltkpy": ["*.txt", "*.json"]},
         include_package_data=True,
-        data_files=[('shared', ['sltkpy/shared/pre.txt', 'sltkpy/shared/abbr.json', 'sltkpy/shared/dict.json'])],
+        data_files=[('shared', ['sltkpy/models/vocab.json'])],
         keywords=['python', 'first package'],
         classifiers= [
             "Development Status :: 3 - Alpha",
