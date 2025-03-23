@@ -7,6 +7,7 @@ class GPETokenizer:
         self.vocab = {}
         self.words = list()
 
+    @staticmethod
     def _get_sinhala_graphemes(text):
         basic_graphemes = regex.findall(r'\X', text)
         
@@ -39,6 +40,7 @@ class GPETokenizer:
                 index += 1
         return char_to_index
     
+    @staticmethod
     def _reverse_dictionary(input_dict):
         return {v: k for k, v in input_dict.items()}
     
@@ -48,6 +50,7 @@ class GPETokenizer:
             freq_map["⣹".join(self._get_sinhala_graphemes(word)) + "⣹⣿"] += 1
         return freq_map
     
+    @staticmethod
     def _get_pairs(freq_map, minimum_freq = 1):
         pairs = Counter()
         for word, freq in freq_map.items():
@@ -70,6 +73,7 @@ class GPETokenizer:
         self.vocab[new_vocab] = len(self.vocab)
         return new_freq_map
     
+    @staticmethod
     def _flatten(list_of_lists):
         return [item for sublist in list_of_lists for item in sublist]
     
@@ -86,6 +90,16 @@ class GPETokenizer:
     
     def load_vocab(self, vocab):
         self.vocab = vocab
+
+    def tokenize(self, text):
+        tokens = []
+        words = text.split()
+        for word in words:
+            word = "⣹".join(self._get_sinhala_graphemes(word)) + "⣹⣿"
+            for subword in self.vocab:
+                word = word.replace("⣹".join(self._get_sinhala_graphemes(subword)), subword)
+            tokens.append(word.split("⣹"))
+        return self._flatten(tokens)
     
     def encode(self, tokens):
         encoded_tokens = []
@@ -100,4 +114,4 @@ class GPETokenizer:
         for enc_tok in encoded_tokens:
             subword = rev_vocab[enc_tok]
             decoded_text += subword.replace('⣿', ' ')
-        return decoded_text
+        return decoded_text.rstrip()
