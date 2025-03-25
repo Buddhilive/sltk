@@ -17,7 +17,7 @@ setup(
         description=DESCRIPTION,
         long_description=LONG_DESCRIPTION,
         long_description_content_type='text/markdown',
-        packages=find_packages(),
+        packages=find_packages(exclude=['tests']),
         install_requires=['regex'],
         package_data={"sltkpy": ["*.txt", "*.json"]},
         include_package_data=True,
