@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.6' 
+VERSION = '1.0.0' 
 DESCRIPTION = 'Sinhala Language Tool Kit'
-LONG_DESCRIPTION = open("README.md", 'r').read()
+LONG_DESCRIPTION = open("README.md", 'r', encoding="utf-8").read()
 
 # Setting up
 
@@ -10,7 +10,6 @@ LONG_DESCRIPTION = open("README.md", 'r').read()
 # python -m twine upload dist/*
 
 setup(
-       # the name must match the folder name 'sltk'
         name="sltkpy", 
         version=VERSION,
         author="Buddhi Kavindra Ranasinghe",
@@ -18,21 +17,26 @@ setup(
         description=DESCRIPTION,
         long_description=LONG_DESCRIPTION,
         long_description_content_type='text/markdown',
-        packages=find_packages(),
-        install_requires=[], # add any additional packages
+        packages=find_packages(exclude=['tests']),
+        install_requires=['regex'],
         package_data={"sltkpy": ["*.txt", "*.json"]},
         include_package_data=True,
-        data_files=[('shared', ['sltkpy/shared/pre.txt', 'sltkpy/shared/abbr.json', 'sltkpy/shared/dict.json'])],
-        keywords=['python', 'first package'],
+        data_files=[('shared', ['sltkpy/models/vocab.json'])],
+        keywords=['python', 'Sinhala Tokenizer'],
+        license='MIT',
+        url='https://github.com/buddhilive/sltk',
         classifiers= [
-            "Development Status :: 3 - Alpha",
+            "Development Status :: 5 - Production/Stable",
             "Intended Audience :: Education",
             "Intended Audience :: Developers",
             "Intended Audience :: Science/Research",
             "License :: OSI Approved :: MIT License",
-            "Programming Language :: Python :: 2",
             "Programming Language :: Python :: 3",
             "Operating System :: MacOS :: MacOS X",
             "Operating System :: Microsoft :: Windows",
+            "Operating System :: POSIX",
+            "Topic :: Software Development :: Libraries",
+            "Topic :: Software Development :: Libraries :: Python Modules",
+            "Topic :: Text Processing :: Linguistic",
         ]
 )
