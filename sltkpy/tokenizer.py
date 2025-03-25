@@ -1,5 +1,5 @@
 import io
-import os
+import importlib.resources
 import json
 import regex
 from collections import Counter
@@ -230,8 +230,14 @@ class GPETokenizer:
             print(f"An unexpected error occurred: {e}")
 
     def pre_load(self):
-        file_path = os.path.abspath('sltkpy/models/vocab.json')
-        self.load_vocab(file_path)
+        try:
+            resource_path = importlib.resources.files('sltkpy.models').joinpath('vocab.json')
+            with resource_path.open(mode='r', encoding='utf-8') as f:
+                self.vocab = json.load(f)
+        except FileNotFoundError:
+            print(f"Error: Vocabulary file 'vocab.json' not found in package 'sltkpy'.")
+        except Exception as e:
+            print(f"Error loading vocabulary: {e}")
 
     def tokenize(self, text):
         """
