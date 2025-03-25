@@ -1,4 +1,5 @@
 import io
+import json
 import regex
 from collections import Counter
 
@@ -215,20 +216,17 @@ class GPETokenizer:
             freq_map = self._merge_pairs(pairs, freq_map)
         return self.vocab
     
-    def load_vocab(self, vocab):
-        """
-        Loads a given vocabulary into the tokenizer.
-
-        This function assigns a given vocabulary to the tokenizer's
-        internal vocabulary attribute, allowing subsequent tokenization
-        and encoding operations to utilize this vocabulary.
-
-        Args:
-            vocab (dict): A dictionary representing the vocabulary where
-            keys are subwords and values are their corresponding indices.
-        """
-
-        self.vocab = vocab
+    def load_vocab(self, file_path):
+        try:
+            with io.open(file_path, 'r', encoding='utf-8') as f:
+                json_content = f.read()
+                self.vocab = json.loads(json_content)
+        except FileNotFoundError:
+            print(f"Error: File not found at {file_path}")
+        except json.JSONDecodeError as e:
+            print(f"Error: Invalid JSON format in {file_path}: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
     def tokenize(self, text):
         """
