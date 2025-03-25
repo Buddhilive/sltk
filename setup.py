@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 VERSION = '0.1.0-beta-1' 
 DESCRIPTION = 'Sinhala Language Tool Kit'
-LONG_DESCRIPTION = open("README.md", 'r').read()
+LONG_DESCRIPTION = open("README.md", 'r', encoding="utf-8").read()
 
 # Setting up
 
