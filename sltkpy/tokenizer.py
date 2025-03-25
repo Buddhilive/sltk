@@ -1,4 +1,5 @@
 import io
+import os
 import json
 import regex
 from collections import Counter
@@ -227,6 +228,10 @@ class GPETokenizer:
             print(f"Error: Invalid JSON format in {file_path}: {e}")
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+
+    def pre_load(self):
+        file_path = os.path.abspath('sltkpy/models/vocab.json')
+        self.load_vocab(file_path)
 
     def tokenize(self, text):
         """

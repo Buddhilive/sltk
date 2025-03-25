@@ -23,4 +23,12 @@ def test_tokenizer_load_vocab():
     encoded_tokens = tokenizer.encode(tokens)
     decoded_text = tokenizer.decode(encoded_tokens)
     assert decoded_text == sample
-    
+
+def test_tokenizer_pre_load():
+    tokenizer = GPETokenizer()
+    tokenizer.pre_load()
+
+    tokens = tokenizer.tokenize(sample)
+    encoded_tokens = tokenizer.encode(tokens)
+    decoded_text = tokenizer.decode(encoded_tokens)
+    assert decoded_text == sample
