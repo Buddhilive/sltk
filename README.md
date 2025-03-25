@@ -1,6 +1,17 @@
+![PyPI - Version](https://img.shields.io/pypi/v/sltkpy)
+![PyPI - Status](https://img.shields.io/pypi/status/sltkpy)
+![PyPI - Format](https://img.shields.io/pypi/format/sltkpy)
+![PyPI - Types](https://img.shields.io/pypi/types/sltkpy)
+![Pepy Total Downloads](https://img.shields.io/pepy/dt/sltkpy)
+![PyPI - License](https://img.shields.io/pypi/l/sltkpy)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/y/buddhilive/sltk)
+
 # SLTK: A Comprehensive Tokenizer for Sinhala Language
 
 Welcome to the GitHub repository for SLTK, a powerful tokenizer designed to enhance Sinhala Natural Language Processing (NLP) tasks. SLTK implements Grapheme Pair Encoding for tokenizing. Although our first [SLTK version](https://github.com/Buddhilive/sltk/tree/legacy) was implemented using [our own research](http://dx.doi.org/10.13140/RG.2.2.21084.40322), this is implemented inspired by the research paper by [Velayuthan et al. (2024).](https://arxiv.org/abs/2409.11501)
+
+> [!NOTE]
+> [Read more about SLTK here>>>](https://www.buddhilive.com/news/sltk-a-modern-tokenizer-for-empowering-sinhala-language-processing/)
 
 ## Installation
 
