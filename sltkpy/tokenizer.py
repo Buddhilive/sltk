@@ -218,6 +218,21 @@ class GPETokenizer:
         return self.vocab
     
     def load_vocab(self, file_path):
+        """
+        Loads a pre-trained vocabulary from a JSON file.
+
+        This function takes a file path to a JSON file and loads the
+        vocabulary from the file. The vocabulary is expected to be a
+        dictionary where the keys are the graphemes and the values are the
+        indices.
+
+        Args:
+            file_path (str): The path to the JSON file containing the
+                vocabulary.
+
+        Returns:
+            None
+        """
         try:
             with io.open(file_path, 'r', encoding='utf-8') as f:
                 json_content = f.read()
@@ -230,6 +245,23 @@ class GPETokenizer:
             print(f"An unexpected error occurred: {e}")
 
     def pre_load(self):
+        """
+        Pre-loads the vocabulary.
+
+        This method attempts to load a pre-trained vocabulary from a JSON file
+        within SLTK package and upon successful loading, it is
+        assigned to the instance's vocab attribute. If the file is not found,
+        or if any other error occurs during loading, an appropriate error
+        message is printed.
+
+        Exceptions:
+            FileNotFoundError: If the 'vocab.json' file is not found in the
+            'sltkpy.models' package directory.
+
+            Exception: For any other errors that occur during the loading
+            process.
+        """
+
         try:
             resource_path = importlib.resources.files('sltkpy.models').joinpath('vocab.json')
             with resource_path.open(mode='r', encoding='utf-8') as f:
